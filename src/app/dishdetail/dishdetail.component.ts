@@ -8,31 +8,28 @@ import { Location } from '@angular/common';
 
 import { Dish } from '../shared/dish';
 import { DishService } from '../services/dish.service';
+import { flyInOut, expand } from '../animations/app.animation';
 
 import 'rxjs/add/operator/switchMap';
 
-import { trigger, state, style, animate, transition } from '@angular/animations';
+import { visibility } from '../animations/app.animation';
 
 @Component({
   selector: 'app-dishdetail',
   templateUrl: './dishdetail.component.html',
   styleUrls: ['./dishdetail.component.scss'],
+  host: {
+    '[@flyInOut]': 'true',
+    'style': 'display: block;'
+  },
   animations: [
-    trigger('visibility', [
-        state('shown', style({
-            transform: 'scale(1.0)',
-            opacity: 1
-        })),
-        state('hidden', style({
-            transform: 'scale(0.5)',
-            opacity: 0
-        })),
-        transition('* => *', animate('0.5s ease-in-out'))
-    ])
+    visibility(),
+    flyInOut(),
+    expand()
   ]
 })
 export class DishdetailComponent implements OnInit {
-  
+
   dish: Dish;
   dishcopy = null;
   dishIds: number[];
@@ -64,16 +61,16 @@ export class DishdetailComponent implements OnInit {
     private route: ActivatedRoute,
     private location: Location,
     private fb: FormBuilder,
-    @Inject('BaseURL') private BaseURL) { 
-      this.createForm();
-    }
+    @Inject('BaseURL') private BaseURL) {
+    this.createForm();
+  }
 
   ngOnInit() {
     this.dishservice.getDishIds().subscribe(dishIds => this.dishIds = dishIds);
     this.route.params
-    .switchMap((params: Params) => { this.visibility = 'hidden'; return this.dishservice.getDish(+params['id']); })
-    .subscribe(dish => { this.dish = dish; this.dishcopy = dish; this.setPrevNext(dish.id); this.visibility = 'shown'; },
-        errmess => { this.dish = null; this.errMess = <any>errmess; });
+      .switchMap((params: Params) => { this.visibility = 'hidden'; return this.dishservice.getDish(+params['id']); })
+      .subscribe(dish => { this.dish = dish; this.dishcopy = dish; this.setPrevNext(dish.id); this.visibility = 'shown'; },
+      errmess => { this.dish = null; this.errMess = <any>errmess; });
   }
 
   createForm() {
@@ -107,8 +104,8 @@ export class DishdetailComponent implements OnInit {
 
   setPrevNext(dishId: number) {
     let index = this.dishIds.indexOf(dishId);
-    this.prev = this.dishIds[(this.dishIds.length + index - 1)%this.dishIds.length];
-    this.next = this.dishIds[(this.dishIds.length + index + 1)%this.dishIds.length];
+    this.prev = this.dishIds[(this.dishIds.length + index - 1) % this.dishIds.length];
+    this.next = this.dishIds[(this.dishIds.length + index + 1) % this.dishIds.length];
   }
 
   goBack(): void {
